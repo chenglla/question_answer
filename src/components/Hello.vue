@@ -54,8 +54,10 @@ export default {
         //   text: "您好，请问有什么可以帮您？"
         // }
       ],
+      jobList: [],
       content: '',
       list_major: [],
+      return_data: [],
       bigbtn: "",
       showinput: true,
       funclist: ["gallery", "camera", "quick"],
@@ -79,6 +81,7 @@ export default {
       this.$refs.messgebox.messageReset()
     }, 5000);
     this.initWindow()
+    this.sendRequestJob()
   },
   methods: {
     initWindow() {
@@ -94,30 +97,58 @@ export default {
           openid: '123456'
         }).then(res => {
           that.content = res.data
-          console.log(typeof that.content)
+          // console.log(typeof that.content)
           console.log(that.content.length)
-          if (typeof that.content === "object") {
-            that.list_major = []
-            for (var item in that.content) {
-              that.list_major.push(that.content[item] + '\r\n')
+          console.log(that.content)
+          that.jobList = that.content.split('[')[1].split(']')[0].split(',')
+          console.log('gfgfgf', that.jobList)
+          if (that.jobList.length > 0) {
+            for (var item in that.jobList) {
+              that.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${that.jobList[item]}')">${that.jobList[item]}</div>`
+              // that.return_data.push(`<div onclick="sendRequest('${that.jobList[item]}')">${that.jobList[item]}</div>`)
             }
             that.messageData.push({
               type: 2,
-              text: '您可能对'+ " \r\n "+ that.list_major +  '感兴趣'
+              text: '您可能对'+ "<br>"+ that.return_data +  '感兴趣'
             });
           }
-          that.messageData.push({
-            type: 2,
-            text: that.replaceImg(that.content)
-          });
-          console.log(that.content)
         })
-        // console.log(this.replaceImg(h))
-        // console.log('11111111', h);
       }
     },
+    sendRequestJob() {
+      const that = this
+      window.sendRequestJob = function(h) {
+        that.messageData.push({
+          type: 1,
+          text: that.replaceImg(h)
+        });
+        getAsk ({
+          askWords: that.replaceImg(h),
+          openid: '123456'
+        }).then(res => {
+          that.content = res.data
+          that.messageData.push({
+            type: 2,
+            text: that.content
+          });
+        })
+      }
+    },
+    // returnData(item) {
+    //   const that = this
+    //   console.log('shuju ', that.jobList)
+    //   that.messageData.push({
+    //     type: 1,
+    //     text: that.replaceImg(item)
+    //   });
+    //   var temp = document.getElementById("return_data").innerHTML;
+    //   this.messageData.push({
+    //     type: 2,
+    //     text:temp
+    //   })
+    // },
     addMeseage () {
-      var temp = document.getElementById("theTemplate").innerHTML ;
+      var temp = document.getElementById("theTemplate").innerHTML;
       // this.sendRequest()
       // console.log(temp)
       this.messageData.push({
