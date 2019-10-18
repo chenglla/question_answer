@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%;width: 100%;display:flex;flex-direction: column;">
     <div class="q_a_header">学涯问答</div>
     <th-message class="q_a_content" ref="messgebox" :useText="true" :usePulldown="true" :pulldownConfig="pulldownconfig" :messageData="messageData" :funcList="funclist" :bigBtn="bigbtn" :showInput="showinput" :selfFace="selfface" :otherFace="otherface" :showEmoticon="true" @sendOut="senRequest" @galleryCall="gallery" @cameraCall="camera" @quickCall="quick" @bigBtnCall="btncall" @faceClick="faceclick" @msgClick="msgclick" @pulldownCall="pulldowncall">
     </th-message>
@@ -8,7 +8,7 @@
 <!--    </div>-->
 <!--    <th-dialog :isShow.sync="showdialog" :showFrom="dialogfrom" :closeOnClickshadow="true" @onHide="hidedialog">-->
 <!--    </th-dialog>-->
-    <div id="theTemplate">
+    <div id="theTemplate" style="display: none;">
       <div class="dialog">
         <div class="title">您可能想问：</div>
         <div class="content"><div onclick="sendRequest('我想学习计算机专业')">我想学习计算机专业</div></div>
@@ -87,6 +87,8 @@ export default {
     initWindow() {
       const that = this
       window.sendRequest = function(h) {
+        that.jobList = []
+        that.return_data = []
         console.log('可以点击啊~~')
         that.messageData.push({
           type: 1,
@@ -175,7 +177,8 @@ export default {
       }
     },
     senRequest (h) {
-      console.log('可以点击啊~~')
+      this.jobList = []
+      this.return_data = []
       this.messageData.push({
         type: 1,
         text: this.replaceImg(h)
@@ -185,35 +188,70 @@ export default {
         openid: '123456'
       }).then(res => {
         this.content = res.data
-        console.log(typeof this.content)
+        // console.log(typeof that.content)
         console.log(this.content.length)
-        if (typeof this.content === "object") {
-          this.list_major = []
-          for (var item in this.content) {
-            this.list_major.push(`<span onclick="sendRequest('${this.content[item]}')">${this.content[item]}</span><br>`)
-          }
+        console.log(this.content)
+        if (this.content.length < 40) {
           this.messageData.push({
             type: 2,
-            text: '您可能对'+ "<br>"+ this.list_major +  '感兴趣'
+            text: this.replaceImg(this.content)
           });
+        } else {
+          this.jobList = this.content.split('[')[1].split(']')[0].split(',')
+          // console.log('gfgfgf', this.jobList)
+          if (this.jobList.length > 0) {
+            for (var item in this.jobList) {
+              this.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${this.jobList[item]}')">${this.jobList[item]}</div>`
+              // that.return_data.push(`<div onclick="sendRequest('${that.jobList[item]}')">${that.jobList[item]}</div>`)
+            }
+            this.messageData.push({
+              type: 2,
+              text: '您可能对'+ "<br>"+ this.return_data +  '感兴趣'
+            });
+          }
         }
-
-        console.log(this.list_major)
-        // for (var item in this.content) {
-        //   console.log(this.content[item].submajorName)
-        //   this.list_major.push(this.content[item].submajorName)
-        // }
-        // console.log(this.list_major)
-        // console.log('444444', this.content)
-        this.messageData.push({
-          type: 2,
-          text: this.replaceImg(this.content)
-        });
-        console.log(this.content)
       })
-      // console.log(this.replaceImg(h))
-      // console.log('11111111', h);
     },
+    // senRequest (h) {
+    //   console.log('可以点击啊~~')
+    //   this.messageData.push({
+    //     type: 1,
+    //     text: this.replaceImg(h)
+    //   });
+    //   getAsk ({
+    //     askWords: this.replaceImg(h),
+    //     openid: '123456'
+    //   }).then(res => {
+    //     this.content = res.data
+    //     console.log(typeof this.content)
+    //     console.log(this.content.length)
+    //     if (typeof this.content === "object") {
+    //       this.list_major = []
+    //       for (var item in this.content) {
+    //         this.list_major.push(`<span onclick="sendRequest('${this.content[item]}')">${this.content[item]}</span><br>`)
+    //       }
+    //       this.messageData.push({
+    //         type: 2,
+    //         text: '您可能对'+ "<br>"+ this.list_major +  '感兴趣'
+    //       });
+    //     }
+    //
+    //     console.log(this.list_major)
+    //     // for (var item in this.content) {
+    //     //   console.log(this.content[item].submajorName)
+    //     //   this.list_major.push(this.content[item].submajorName)
+    //     // }
+    //     // console.log(this.list_major)
+    //     // console.log('444444', this.content)
+    //     this.messageData.push({
+    //       type: 2,
+    //       text: this.replaceImg(this.content)
+    //     });
+    //     console.log(this.content)
+    //   })
+    //   // console.log(this.replaceImg(h))
+    //   // console.log('11111111', h);
+    // },
     gallery () {
       console.warn("调起了自定义组件");
       this.messageData.push({

@@ -207,7 +207,7 @@ export default {
         window.innerHeight ||
         document.documentElement.clientHeight ||
         document.body.clientHeight;
-      this.screamHeight = h2 - 60;   //也不知道是啥，先减再说
+      this.screamHeight = h2 - 40;   //也不知道是啥，先减再说
       this.$refs.scrollerEvent.getStyles();
       this.messageReset();
     };
