@@ -105,10 +105,10 @@ export default {
           that.jobList = that.content.split('[')[1].split(']')[0].split(',')
           console.log('gfgfgf', that.jobList)
           if (that.jobList.length > 0) {
-            for (var item in that.jobList) {
-              that.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${that.jobList[item]}')">${that.jobList[item]}</div>`
-              // that.return_data.push(`<div onclick="sendRequest('${that.jobList[item]}')">${that.jobList[item]}</div>`)
-            }
+              for (var item in that.jobList) {
+                that.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${that.jobList[item]}')">${that.jobList[item]}</div>`
+                // that.return_data.push(`<div onclick="sendRequest('${that.jobList[item]}')">${that.jobList[item]}</div>`)
+              }
             that.messageData.push({
               type: 2,
               text: '您可能对'+ "<br>"+ that.return_data +  '感兴趣'
