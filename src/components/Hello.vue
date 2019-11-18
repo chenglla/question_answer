@@ -96,6 +96,8 @@ export default {
     this.showClose()
     this.showOpenDetails()
     this.showCloseDetails()
+    this.showCloseTitle() // type=2/1对感兴趣的列表较多，下拉展示
+    this.showOpenTitle()
   },
   methods: {
     initWindow() {
@@ -117,6 +119,7 @@ export default {
           console.log(that.content.length)
           console.log(that.content)
           that.flag = that.content.split(':')[1].split('}')[0] // 获取类型（调用哪个接口）
+          console.log('flag:', that.flag)
           if (that.flag === '3') {
             console.log('flag:', that.flag)
             // console.log('flagtype:', typeof that.flag)
@@ -134,7 +137,7 @@ export default {
               type: 2,
               text: that.jobList[0] + "<br>"+ '相似问题推荐：'+ "<br>"+ that.ques_list
             });
-          }else if (that.flag === '2') {
+          }else if (that.flag === '2' || that.flag === '1') {
             that.jobList = that.content.split('[')[1].split(']')[0].split(',')
             that.return_data = []
             if (that.jobList.length > 0) {
@@ -142,10 +145,16 @@ export default {
                   that.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${that.jobList[item]}')">${that.jobList[item]}</div>`
                   // that.return_data.push(`<div onclick="sendRequest('${that.jobList[item]}')">${that.jobList[item]}</div>`)
                 }
-              that.messageData.push({
-                type: 2,
-                text: '您可能对'+ "<br>"+ that.return_data +  '感兴趣'
-              });
+                const a = `<div style="max-height: 120px;overflow: hidden;display: inline-block;">${that.return_data}</div><div onclick="showOpenTitle()" style="font-size: 13px;color: blueviolet;display: inline-block;">展开</div>`
+                that.messageData.push({
+                  type: 2,
+                  text: '您可能对'+ "<br>"+ a + "<br>" +  '感兴趣'
+                  // text: '您可能对'+ "<br>"+ this.return_data +  '感兴趣'
+                });
+                // that.messageData.push({
+                //   type: 2,
+                //   text: '您可能对'+ "<br>"+ that.return_data +  '感兴趣'
+                // });
             }
           }
         })
@@ -167,7 +176,9 @@ export default {
 //           that.jobList[0] = `<div onclick="showOpen()"><div style="font-size: 14px;max-height: 40px;margin-bottom: 15px;overflow: hidden" v-if="!${that.showHeight}">${that.jobList[0]}</div>
 // <div style="font-size: 14px;margin-bottom: 15px;" v-if="${that.showHeight}" >${that.jobList[0]}</div></div>`
 //           console.log('werwerwerwerw00000000', that.jobList[0])
-          that.jobList_first = `<div style="font-size: 14px;max-height: 50px;overflow: hidden">${that.jobList[0]}</div><span onclick="showOpen()" style="font-size: 13px;color: blueviolet">展开</span>`
+          if (that.jobList[0].length > 0) {
+            that.jobList_first = `<div style="font-size: 14px;max-height: 50px;overflow: hidden">${that.jobList[0]}</div><span onclick="showOpen()" style="font-size: 13px;color: blueviolet">展开</span>`
+          }
           // if (that.showHeight === false) {
           //   that.jobList_first = `<div style="font-size: 14px;max-height: 50px;overflow: hidden">${that.jobList[0]}</div><span onclick="showOpen()" style="font-size: 13px;color: blueviolet">展开</span>`
           // } else {
@@ -240,7 +251,7 @@ export default {
     showOpenDetails() {
       const _this = this
       window.showOpenDetails = function() {
-        _this.content_ret = `<div style="font-size: 14px">${_this.content}</div><span onclick="showCloseDetails()" style="font-size: 13px;color: blueviolet">展开</span>`
+        _this.content_ret = `<div style="font-size: 14px">${_this.content}</div><span onclick="showCloseDetails()" style="font-size: 13px;color: blueviolet">收起</span>`
         _this.messageData.pop()
         _this.messageData.push({
           type: 2,
@@ -251,7 +262,7 @@ export default {
     showCloseDetails() {
       const _this = this
       window.showCloseDetails = function() {
-        _this.content_ret = `<div style="font-size: 14px;max-height: 50px;overflow: hidden">${_this.content}</div><span onclick="showOpenDetails()" style="font-size: 13px;color: blueviolet">展开</span>`
+        _this.content_ret = `<div style="font-size: 14px;max-height: 50px;overflow: hidden" >${_this.content}</div><span onclick="showOpenDetails()" style="font-size: 13px;color: blueviolet">展开</span>`
         _this.messageData.pop()
         _this.messageData.push({
           type: 2,
@@ -271,7 +282,7 @@ export default {
           // openid: '123456'
         }).then(res => {
           that.content = res.data.answer
-          that.content_ret = `<div style="font-size: 14px;max-height: 50px;overflow: auto">${that.content}</div><span onclick="showOpenDetails()" style="font-size: 13px;color: blueviolet">展开</span>`
+          that.content_ret = `<div style="font-size: 14px;max-height:50px;overflow: hidden">${that.content}</div><span onclick="showOpenDetails()" style="font-size: 13px;color: blueviolet">展开</span>`
           // console.log(that.content_ret.height)
           that.messageData.push({
             type: 2,
@@ -337,6 +348,7 @@ export default {
         console.log(this.content.length)
         console.log(this.content)
         this.flag = this.content.split(':')[1].split('}')[0] // 获取类型（调用哪个接口）
+        console.log('flag:', this.flag)
         if (this.flag === '3') {
           console.log('flag:', this.flag)
           // console.log('flagtype:', typeof that.flag)
@@ -355,57 +367,45 @@ export default {
             type: 2,
             text: this.jobList[0] + "<br>"+ '相似问题推荐：'+ "<br>"+ this.ques_list
           });
-        }else if (this.flag === '2') {
+        }else if (this.flag === '2' || this.flag === '1') {
           this.jobList = this.content.split('[')[1].split(']')[0].split(',')
           this.return_data = []
           if (this.jobList.length > 0) {
-            for (var item in this.jobList) {
+            for (const item in this.jobList) {
               this.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${this.jobList[item]}')">${this.jobList[item]}</div>`
               // that.return_data.push(`<div onclick="sendRequest('${that.jobList[item]}')">${that.jobList[item]}</div>`)
             }
+            const a = `<div style="max-height: 120px;overflow: hidden;display: inline-block;">${this.return_data}</div><div onclick="showOpenTitle()" style="font-size: 13px;color: blueviolet;display: inline-block;">展开</div>`
             this.messageData.push({
               type: 2,
-              text: '您可能对'+ "<br>"+ this.return_data +  '感兴趣'
+              text: '您可能对'+ "<br>"+ a + "<br>" +  '感兴趣'
+              // text: '您可能对'+ "<br>"+ this.return_data +  '感兴趣'
             });
           }
         }
       })
-      // this.jobList = []
-      // this.return_data = []
-      // this.messageData.push({
-      //   type: 1,
-      //   text: this.replaceImg(h)
-      // });
-      // getAsk ({
-      //   askWords: this.replaceImg(h),
-      //   openid: '123456'
-      // }).then(res => {
-      //   this.content = res.data
-      //   // console.log(typeof that.content)
-      //   console.log(this.content.length)
-      //   console.log(this.content)
-      //   if (this.content.length < 40) {
-      //     this.messageData.push({
-      //       type: 2,
-      //       text: this.replaceImg(this.content)
-      //     });
-      //   } else {
-      //     this.flag = this.content.split('[')[1].split(']')[0].split(':')[1].split('}')[0]
-      //     console.log('111111111', this.flag)
-      //     this.jobList = this.content.split('[')[1].split(']')[0].split(',')
-      //     // console.log('gfgfgf', this.jobList)
-      //     if (this.jobList.length > 0) {
-      //       for (var item in this.jobList) {
-      //         this.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${this.jobList[item]}')">${this.jobList[item]}</div>`
-      //         // that.return_data.push(`<div onclick="sendRequest('${that.jobList[item]}')">${that.jobList[item]}</div>`)
-      //       }
-      //       this.messageData.push({
-      //         type: 2,
-      //         text: '您可能对'+ "<br>"+ this.return_data +  '感兴趣'
-      //       });
-      //     }
-      //   }
-      // })
+    },
+    showOpenTitle() {
+      const _this = this
+      window.showOpenTitle = function() {
+        const a = `<div style="font-size: 14px">${_this.return_data}</div><span onclick="showCloseTitle()" style="font-size: 13px;color: blueviolet">收起</span>`
+        _this.messageData.pop()
+        _this.messageData.push({
+          type: 2,
+          text: '您可能对'+ "<br>"+ a + "<br>" +  '感兴趣'
+        })
+      }
+    },
+    showCloseTitle() {
+      const _this = this
+      window.showCloseTitle = function() {
+        const a = `<div style="max-height: 120px;overflow: hidden;display: inline-block;">${_this.return_data}</div><div onclick="showOpenTitle()" style="font-size: 13px;color: blueviolet;display: inline-block;">展开</div>`
+        _this.messageData.pop()
+        _this.messageData.push({
+          type: 2,
+          text: '您可能对'+ "<br>"+ a + "<br>" +  '感兴趣'
+        })
+      }
     },
     // senRequest (h) {
     //   console.log('可以点击啊~~')
