@@ -13,7 +13,9 @@
         <div class="title">您可能想问：</div>
         <div class="content"><div onclick="sendRequest('我想学习计算机专业')">我想学习计算机专业</div></div>
         <div class="content"><div onclick="sendRequest('我想学习建筑专业')">我想学习建筑专业</div></div>
+        <div class="content"><div onclick="sendRequest('网络')">网络</div></div>
         <div><a href="http://www.zhongkeruitong.top/evaluate/evaluate/index.html" class="content">我要测评</a></div>
+        <div><a href="http://zhiheyikaoqin.cn/show/cee/wechat/authorize?returnUrl=index.html" class="content">志愿预测</a></div>
       </div>
     </div>
   </div>
@@ -27,7 +29,7 @@ import ThDialog from "./dialog";
 import { messageData, facelist } from "@/assets/testdata.js";
 import selfface from "@/assets/images/p1.jpg";
 import otherface from "@/assets/images/timg.jpg";
-import { getAsk } from '@/api/index'
+import { getAsk, getDB3Ask } from '@/api/index'
 
 export default {
   name: "",
@@ -54,10 +56,17 @@ export default {
         //   text: "您好，请问有什么可以帮您？"
         // }
       ],
+      // showHeight: false,
+      content_ret: '',
+      flag: '',
       jobList: [],
+      jobList_first: '',
       content: '',
       list_major: [],
       return_data: [],
+      ques_list: [],
+      ques_lists: [],
+      b: [],
       bigbtn: "",
       showinput: true,
       funclist: ["gallery", "camera", "quick"],
@@ -82,6 +91,11 @@ export default {
     }, 5000);
     this.initWindow()
     this.sendRequestJob()
+    this.sendRequestJob_3()
+    this.showOpen()
+    this.showClose()
+    this.showOpenDetails()
+    this.showCloseDetails()
   },
   methods: {
     initWindow() {
@@ -102,17 +116,37 @@ export default {
           // console.log(typeof that.content)
           console.log(that.content.length)
           console.log(that.content)
-          that.jobList = that.content.split('[')[1].split(']')[0].split(',')
-          console.log('gfgfgf', that.jobList)
-          if (that.jobList.length > 0) {
-              for (var item in that.jobList) {
-                that.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${that.jobList[item]}')">${that.jobList[item]}</div>`
-                // that.return_data.push(`<div onclick="sendRequest('${that.jobList[item]}')">${that.jobList[item]}</div>`)
+          that.flag = that.content.split(':')[1].split('}')[0] // 获取类型（调用哪个接口）
+          if (that.flag === '3') {
+            console.log('flag:', that.flag)
+            // console.log('flagtype:', typeof that.flag)
+            that.jobList = that.content.split('{')[0].split('相似问题推荐：') // 分开前面的解释和后面的问题
+            that.ques_list = []
+            that.ques_lists = that.jobList[1].split(';')
+            for (const i in that.ques_lists) {
+              console.log(that.ques_lists[i])
+              if (that.ques_lists[i].length > 1) {
+                // that.ques_list += that.ques_lists[i]
+                that.ques_list += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob_3('${that.ques_lists[i]}')">${that.ques_lists[i]}</div>`
               }
+            }
             that.messageData.push({
               type: 2,
-              text: '您可能对'+ "<br>"+ that.return_data +  '感兴趣'
+              text: that.jobList[0] + "<br>"+ '相似问题推荐：'+ "<br>"+ that.ques_list
             });
+          }else if (that.flag === '2') {
+            that.jobList = that.content.split('[')[1].split(']')[0].split(',')
+            that.return_data = []
+            if (that.jobList.length > 0) {
+                for (const item in that.jobList) {
+                  that.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${that.jobList[item]}')">${that.jobList[item]}</div>`
+                  // that.return_data.push(`<div onclick="sendRequest('${that.jobList[item]}')">${that.jobList[item]}</div>`)
+                }
+              that.messageData.push({
+                type: 2,
+                text: '您可能对'+ "<br>"+ that.return_data +  '感兴趣'
+              });
+            }
           }
         })
       }
@@ -129,9 +163,119 @@ export default {
           openid: '123456'
         }).then(res => {
           that.content = res.data
+          that.jobList = that.content.split('{')[0].split('相似问题推荐：') // 分开前面的解释和后面的问题
+//           that.jobList[0] = `<div onclick="showOpen()"><div style="font-size: 14px;max-height: 40px;margin-bottom: 15px;overflow: hidden" v-if="!${that.showHeight}">${that.jobList[0]}</div>
+// <div style="font-size: 14px;margin-bottom: 15px;" v-if="${that.showHeight}" >${that.jobList[0]}</div></div>`
+//           console.log('werwerwerwerw00000000', that.jobList[0])
+          that.jobList_first = `<div style="font-size: 14px;max-height: 50px;overflow: hidden">${that.jobList[0]}</div><span onclick="showOpen()" style="font-size: 13px;color: blueviolet">展开</span>`
+          // if (that.showHeight === false) {
+          //   that.jobList_first = `<div style="font-size: 14px;max-height: 50px;overflow: hidden">${that.jobList[0]}</div><span onclick="showOpen()" style="font-size: 13px;color: blueviolet">展开</span>`
+          // } else {
+          //   that.jobList_first = `<div style="font-size: 14px;" onclick="showOpen()">${that.jobList[0]}</div>`
+          //   // that.jobList[0] = `<div style="font-size: 14px;margin-bottom: 15px;" v-if="${that.showHeight}" onclick="showOpen()">${that.jobList[0]}</div>`
+          // }
+          // console.log('werwerwerwerw11111111111', that.jobList_first)
+//           that.jobList[0] = that.showHeight === false ? `<div style="font-size: 14px;max-height: 50px;overflow: hidden" v-if="!${that.showHeight}" onclick="showOpen()">${that.jobList[0]}</div>`:
+// `<div style="font-size: 14px;margin-bottom: 15px;" v-if="${that.showHeight}" onclick="showOpen()">${that.jobList[0]}</div>`
+          that.ques_list = []
+          that.ques_lists = that.jobList[1].split(';')
+          for (const i in that.ques_lists) {
+            console.log(that.ques_lists[i])
+            if (that.ques_lists[i].length > 1) {
+              // that.ques_list += that.ques_lists[i]
+              that.ques_list += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob_3('${that.ques_lists[i]}')">${that.ques_lists[i]}</div>`
+            }
+          }
           that.messageData.push({
             type: 2,
-            text: that.content
+            text: that.jobList_first + "<br>"+ '相似问题推荐：'+ "<br>"+ that.ques_list
+          });
+          // console.log('222222222ma', that.content)
+          // that.messageData.push({
+          //   type: 2,
+          //   text: that.content
+          // });
+        })
+      }
+    },
+    showOpen() {
+      const _this = this
+      window.showOpen = function() {
+        _this.jobList_first = `<div style="font-size: 14px;">${_this.jobList[0]}</div><span onclick="showClose()" style="font-size: 13px;color: blueviolet">收起</span>`
+        // console.log(_this.jobList_first)
+        _this.messageData.pop()
+        // console.log(_this.messageData)
+        _this.messageData.push({
+          type: 2,
+          text: _this.jobList_first + "<br>"+ '相似问题推荐：'+ "<br>"+ _this.ques_list
+        })
+        // _this.jobList[0] = []
+        // if (_this.showHeight === false) {
+          // _this.jobList[0] = `<div style="font-size: 14px;max-height: 50px;overflow: hidden" >${_this.jobList[0]}</div>`
+        // } else {
+          // _this.jobList[0] = `<div style="font-size: 14px;">${_this.jobList[0]}</div>`
+        // }
+        // console.log('meL:', _this.jobList[0])
+        // _this.messageData.push({
+        //   type: 2,
+        //   text: _this.jobList[0]
+        // });
+        // _this.
+        // if (_this.showHeight === false) {
+        //   _this.showHeight = true
+        // }
+      }
+    },
+    showClose() {
+      const _this = this
+      window.showClose = function() {
+        _this.jobList_first = `<div style="font-size: 14px;max-height: 50px;overflow: hidden">${_this.jobList[0]}</div><span onclick="showOpen()" style="font-size: 13px;color: blueviolet">展开</span>`
+        _this.messageData.pop()
+        _this.messageData.push({
+          type: 2,
+          text: _this.jobList_first + "<br>"+ '相似问题推荐：'+ "<br>"+ _this.ques_list
+        })
+      }
+    },
+    showOpenDetails() {
+      const _this = this
+      window.showOpenDetails = function() {
+        _this.content_ret = `<div style="font-size: 14px">${_this.content}</div><span onclick="showCloseDetails()" style="font-size: 13px;color: blueviolet">展开</span>`
+        _this.messageData.pop()
+        _this.messageData.push({
+          type: 2,
+          text: _this.content_ret
+        })
+      }
+    },
+    showCloseDetails() {
+      const _this = this
+      window.showCloseDetails = function() {
+        _this.content_ret = `<div style="font-size: 14px;max-height: 50px;overflow: hidden">${_this.content}</div><span onclick="showOpenDetails()" style="font-size: 13px;color: blueviolet">展开</span>`
+        _this.messageData.pop()
+        _this.messageData.push({
+          type: 2,
+          text: _this.content_ret
+        })
+      }
+    },
+    sendRequestJob_3() {
+      const that = this
+      window.sendRequestJob_3 = function(h) {
+        // that.messageData.push({
+        //   type: 1,
+        //   text: that.replaceImg(h)
+        // });
+        getDB3Ask ({
+          query: that.replaceImg(h),
+          // openid: '123456'
+        }).then(res => {
+          that.content = res.data.answer
+          that.content_ret = `<div style="font-size: 14px;max-height: 50px;overflow: auto">${that.content}</div><span onclick="showOpenDetails()" style="font-size: 13px;color: blueviolet">展开</span>`
+          // console.log(that.content_ret.height)
+          that.messageData.push({
+            type: 2,
+            text: that.content_ret
           });
         })
       }
@@ -150,7 +294,7 @@ export default {
     //   })
     // },
     addMeseage () {
-      var temp = document.getElementById("theTemplate").innerHTML;
+      const temp = document.getElementById("theTemplate").innerHTML;
       // this.sendRequest()
       // console.log(temp)
       this.messageData.push({
@@ -179,6 +323,7 @@ export default {
     senRequest (h) {
       this.jobList = []
       this.return_data = []
+      console.log('可以点击啊~~')
       this.messageData.push({
         type: 1,
         text: this.replaceImg(h)
@@ -191,14 +336,28 @@ export default {
         // console.log(typeof that.content)
         console.log(this.content.length)
         console.log(this.content)
-        if (this.content.length < 40) {
+        this.flag = this.content.split(':')[1].split('}')[0] // 获取类型（调用哪个接口）
+        if (this.flag === '3') {
+          console.log('flag:', this.flag)
+          // console.log('flagtype:', typeof that.flag)
+          this.jobList = this.content.split('{')[0].split('相似问题推荐：') // 分开前面的解释和后面的问题
+          this.ques_list = []
+          this.ques_lists = this.jobList[1].split(';')
+          // this.jobList[0] = `<div style="font-size: 14px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">${this.jobList[0]}</div>`
+          for (const i in this.ques_lists) {
+            console.log(this.ques_lists[i])
+            if (this.ques_lists[i].length > 1) {
+              // that.ques_list += that.ques_lists[i]
+              this.ques_list += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob_3('${this.ques_lists[i]}')">${this.ques_lists[i]}</div>`
+            }
+          }
           this.messageData.push({
             type: 2,
-            text: this.replaceImg(this.content)
+            text: this.jobList[0] + "<br>"+ '相似问题推荐：'+ "<br>"+ this.ques_list
           });
-        } else {
+        }else if (this.flag === '2') {
           this.jobList = this.content.split('[')[1].split(']')[0].split(',')
-          // console.log('gfgfgf', this.jobList)
+          this.return_data = []
           if (this.jobList.length > 0) {
             for (var item in this.jobList) {
               this.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${this.jobList[item]}')">${this.jobList[item]}</div>`
@@ -211,6 +370,42 @@ export default {
           }
         }
       })
+      // this.jobList = []
+      // this.return_data = []
+      // this.messageData.push({
+      //   type: 1,
+      //   text: this.replaceImg(h)
+      // });
+      // getAsk ({
+      //   askWords: this.replaceImg(h),
+      //   openid: '123456'
+      // }).then(res => {
+      //   this.content = res.data
+      //   // console.log(typeof that.content)
+      //   console.log(this.content.length)
+      //   console.log(this.content)
+      //   if (this.content.length < 40) {
+      //     this.messageData.push({
+      //       type: 2,
+      //       text: this.replaceImg(this.content)
+      //     });
+      //   } else {
+      //     this.flag = this.content.split('[')[1].split(']')[0].split(':')[1].split('}')[0]
+      //     console.log('111111111', this.flag)
+      //     this.jobList = this.content.split('[')[1].split(']')[0].split(',')
+      //     // console.log('gfgfgf', this.jobList)
+      //     if (this.jobList.length > 0) {
+      //       for (var item in this.jobList) {
+      //         this.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${this.jobList[item]}')">${this.jobList[item]}</div>`
+      //         // that.return_data.push(`<div onclick="sendRequest('${that.jobList[item]}')">${that.jobList[item]}</div>`)
+      //       }
+      //       this.messageData.push({
+      //         type: 2,
+      //         text: '您可能对'+ "<br>"+ this.return_data +  '感兴趣'
+      //       });
+      //     }
+      //   }
+      // })
     },
     // senRequest (h) {
     //   console.log('可以点击啊~~')
