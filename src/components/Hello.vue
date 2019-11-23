@@ -59,6 +59,7 @@ export default {
       // showHeight: false,
       content_ret: '',
       flag: '',
+      flag_1: '',
       jobList: [],
       jobList_first: '',
       content: '',
@@ -156,6 +157,12 @@ export default {
                 //   text: '您可能对'+ "<br>"+ that.return_data +  '感兴趣'
                 // });
             }
+          } else {
+            const type_1 = this.content.split('{')[0]
+            this.messageData.push({
+              type: 2,
+              text: type_1
+            });
           }
         })
       }
@@ -163,6 +170,8 @@ export default {
     sendRequestJob() {
       const that = this
       window.sendRequestJob = function(h) {
+        console.log('擦混给后端的值：', h)
+        console.log('擦混给后端的值：', that.replaceImg(h))
         that.messageData.push({
           type: 1,
           text: that.replaceImg(h)
@@ -172,6 +181,9 @@ export default {
           openid: '123456'
         }).then(res => {
           that.content = res.data
+          that.flag_1 = that.content.split(':')[1].split('}')[0] // 获取类型（调用哪个接口）
+          // if (that.flag_1 === '1') // 获取类型（调用哪个接口）
+          console.log('格式为：', that.content)
           that.jobList = that.content.split('{')[0].split('相似问题推荐：') // 分开前面的解释和后面的问题
 //           that.jobList[0] = `<div onclick="showOpen()"><div style="font-size: 14px;max-height: 40px;margin-bottom: 15px;overflow: hidden" v-if="!${that.showHeight}">${that.jobList[0]}</div>
 // <div style="font-size: 14px;margin-bottom: 15px;" v-if="${that.showHeight}" >${that.jobList[0]}</div></div>`
@@ -346,7 +358,7 @@ export default {
         this.content = res.data
         // console.log(typeof that.content)
         console.log(this.content.length)
-        console.log(this.content)
+        console.log('返回内容：', this.content)
         this.flag = this.content.split(':')[1].split('}')[0] // 获取类型（调用哪个接口）
         console.log('flag:', this.flag)
         if (this.flag === '3') {
@@ -375,6 +387,7 @@ export default {
               this.return_data += `<div style="font-size: 13px;color: #4a93ec;margin-left: 5px;" onclick="sendRequestJob('${this.jobList[item]}')">${this.jobList[item]}</div>`
               // that.return_data.push(`<div onclick="sendRequest('${that.jobList[item]}')">${that.jobList[item]}</div>`)
             }
+            console.log('this.return', this.return_data)
             const a = `<div style="max-height: 120px;overflow: hidden;display: inline-block;">${this.return_data}</div><div onclick="showOpenTitle()" style="font-size: 13px;color: blueviolet;display: inline-block;">展开</div>`
             this.messageData.push({
               type: 2,
@@ -382,6 +395,14 @@ export default {
               // text: '您可能对'+ "<br>"+ this.return_data +  '感兴趣'
             });
           }
+        } else {
+          const type_1 = this.content.split('{')[0]
+          this.messageData.push({
+            type: 2,
+            text: type_1
+            // text: '您可能对'+ "<br>"+ this.return_data +  '感兴趣'
+          });
+
         }
       })
     },
