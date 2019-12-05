@@ -58,6 +58,7 @@ export default {
       ],
       // showHeight: false,
       content_ret: '',
+      flagContent: '', // 搜索提示传的值
       flag: '',
       flag_1: '',
       jobList: [],
@@ -344,12 +345,18 @@ export default {
       }
     },
     senRequest (h) {
+      if (h.indexOf('{') > -1) {
+        this.flagContent = h.split('{')[0]
+      }else {
+        this.flagContent = h
+      }
+      console.log('传给东子的：', h)
       this.jobList = []
       this.return_data = []
       console.log('可以点击啊~~')
       this.messageData.push({
         type: 1,
-        text: this.replaceImg(h)
+        text: this.replaceImg(this.flagContent)
       });
       getAsk ({
         askWords: this.replaceImg(h),

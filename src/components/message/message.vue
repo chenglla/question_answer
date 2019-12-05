@@ -27,10 +27,19 @@
       <template v-if="useText">
         <i class="icon-add" :class="{isopen:funcShow}" @click="openfunc"></i>
         <i v-if="showEmoticon" class="icon-face" :class="{isopen:faceShow}" @click="openface"></i>
-        <input ref="thMessageInputF" class="messageinput" v-model="inputmodel" type="text" @focus="onfocus" @blur="onblur" @keyup.enter="changecount"/>
+        <popover placement="top" class="input_popover" style="margin: 5px;position: absolute;" v-if="showTanKu" @on-show="onShow" @on-hide="onHide">
+          <div slot="content" class="popover-demo-content" v-for="(item, index) in searchTips" :key="index" @click="tipClick(item)">
+            {{item || '暂无'}}
+          </div>
+        </popover>
+        <input ref="thMessageInputF" id="messageinput" class="messageinput" v-model="inputmodel" type="text" @focus="onfocus" @blur="onblur" @keyup.enter="changecount" oninput="changeText()"/>
         <x-button class="sendbtn" :type="inputmodel.trim()===''?'default':'primary'" :disabled="inputmodel.trim()===''" @click.native="changecount">
           发送
         </x-button>
+<!--        <input ref="thMessageInputF" id="messageinput" class="messageinput" v-model="inputmodel" type="text" @focus="onfocus" @blur="onblur" @keyup.enter="changecount" oninput="changeText()"/>-->
+<!--        <x-button class="sendbtn" :type="inputmodel.trim()===''?'default':'primary'" :disabled="inputmodel.trim()===''" @click.native="changecount">-->
+<!--          发送-->
+<!--        </x-button>-->
       </template>
     </div>
     <facebox v-show="faceShow" ref="facebox" :facelist="facelist" @itemClick="faceItemClick"></facebox>
@@ -47,8 +56,9 @@ import quick from "@/assets/images/quick.png";
 import camera from "@/assets/images/camera.png";
 import gallery from "@/assets/images/gallery.png";
 
-import { Scroller, XButton } from "vux";
+import { Scroller, XButton, Popover } from "vux";
 import { facelist } from "@/assets/testdata.js";
+import {getSearchTip} from '@/api/index';
 
 import facebox from "./facebox.vue";
 import funcbox from "./funcbox.vue";
@@ -105,7 +115,8 @@ export default {
     Scroller,
     XButton,
     facebox,
-    funcbox
+    funcbox,
+    Popover
   },
   watch: {
     textfocus (e) {
@@ -141,6 +152,10 @@ export default {
   },
   data () {
     return {
+      flag: '',
+      chuanzhi: '',
+      searchTips: [], // 搜索提示
+      showTanKu: false,
       bottomheight: "-120",
       defaultresize: 100,
       boxheight: "0px",
@@ -193,6 +208,7 @@ export default {
     };
   },
   mounted () {
+    this.changeText(this.inputmodel)
     if (this.showInput === false) {
       this.defaultresize = 40;
     }
@@ -288,15 +304,60 @@ export default {
       }
     },
     changecount () {
+      if (this.flag.length > 0) {
+        if (this.inputmodel.trim() !== "") {
+          let html = this.inputmodel + this.flag;
+          this.$nextTick(() => {
+            this.messageReset();
+            this.inputmodel = "";
+            this.flag = "";
+            this.$emit("sendOut", html);
+          });
+        }
+      } else {
+        if (this.inputmodel.trim() !== "") {
+          let html = this.inputmodel;
+          this.$nextTick(() => {
+            this.messageReset();
+            this.inputmodel = "";
+            this.$emit("sendOut", html);
+          });
+        }
+      }
       console.log(this.inputmodel.trim())
       console.log('哈哈哈')
-      if (this.inputmodel.trim() !== "") {
-        let html = this.inputmodel;
-        this.$nextTick(() => {
-          this.messageReset();
-          this.inputmodel = "";
-          this.$emit("sendOut", html);
-        });
+    },
+    tipClick (val) {
+      console.log('点击提示', val)
+      this.flag = '{searchTip}'
+      this.inputmodel = val
+      // this.chuanzhi = val + this.flag
+      this.showTanKu = false
+    },
+    changeText () {
+      const that = this
+      window.changeText = function() {
+        var x = document.getElementById('messageinput')
+        // x.value = x.value.toUpperCase(); // 只展示大写字母
+        console.log('改变了么：', x.value)
+        getSearchTip({
+          query: x.value
+        }).then(res => {
+          that.searchTips = []
+          // that.searchTips = res.data
+          for (const item in res.data) {
+            that.searchTips.push(res.data[item])
+          }
+          console.log(that.searchTips.length)
+          console.log(that.showTanKu)
+          if (that.searchTips.length > 0) {
+            that.showTanKu = true
+          } else if (that.searchTips.length === 0) {
+            that.showTanKu = false
+          }
+          console.log('tips:', res.data)
+        })
+        console.log('aaaaaa', that.searchTips)
       }
     },
     faceclick (d) {
@@ -307,6 +368,12 @@ export default {
     },
     btnCall () {
       this.$emit("bigBtnCall");
+    },
+    onShow () {
+      console.log('on show')
+    },
+    onHide () {
+      console.log('on hide')
     },
     openface () {
       this.funcShow = false;
@@ -373,7 +440,7 @@ export default {
   }
 };
 </script>
-<style scoped>
+<style scoped lang="less">
   .message_button{
     /*position: absolute;*/
     padding-left: 20px;
@@ -395,5 +462,23 @@ export default {
   }
   .message_button_a{
     color: #4a93ec;
+  }
+  /*.messageinput {*/
+  /*  margin-top: -5px;*/
+  /*}*/
+  .popover-demo-content {
+    padding: 5px 10px;
+  }
+  .vux-popover {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    /* top: 83%; */
+    bottom: 7%;
+    width: 80%;
+    background-color: #35495e;
+    color: #fff;
+    border-radius: 3px;
+    z-index: 500;
   }
 </style>
