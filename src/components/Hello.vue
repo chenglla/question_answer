@@ -14,8 +14,8 @@
         <div class="content"><div onclick="sendRequest('我想学习计算机专业')">我想学习计算机专业</div></div>
         <div class="content"><div onclick="sendRequest('我想学习建筑专业')">我想学习建筑专业</div></div>
         <div class="content"><div onclick="sendRequest('网络')">网络</div></div>
-        <div><a href="http://www.zhongkeruitong.top/evaluate/evaluate/index.html" class="content">我要测评</a></div>
-        <div><a href="http://zhiheyikaoqin.cn/show/cee/wechat/authorize?returnUrl=index.html" class="content">志愿预测</a></div>
+<!--        <div><a href="http://www.zhongkeruitong.top/evaluate/evaluate/index.html" class="content">我要测评</a></div>-->
+<!--        <div><a href="http://zhiheyikaoqin.cn/show/cee/wechat/authorize?returnUrl=index.html" class="content">志愿预测</a></div>-->
       </div>
     </div>
   </div>

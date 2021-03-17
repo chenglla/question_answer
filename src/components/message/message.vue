@@ -20,8 +20,8 @@
       <span class="message_button_content" @click="addMessage('我想学习计算机专业')">我想学习计算机专业</span>
       <span class="message_button_content" @click="addMessage('我想学习建筑专业')">我想学习建筑专业</span>
       <span class="message_button_content" @click="addMessage('网络')">网络</span>
-      <span class="message_button_content"><a href="http://www.zhongkeruitong.top/evaluate/evaluate/index.html" class="message_button_a">我要测评</a></span>
-      <span class="message_button_content"><a href="http://zhiheyikaoqin.cn/show/cee/wechat/authorize?returnUrl=index.html" class="message_button_a">志愿预测</a></span>
+<!--      <span class="message_button_content"><a href="http://www.zhongkeruitong.top/evaluate/evaluate/index.html" class="message_button_a">我要测评</a></span>-->
+<!--      <span class="message_button_content"><a href="http://zhiheyikaoqin.cn/show/cee/wechat/authorize?returnUrl=index.html" class="message_button_a">志愿预测</a></span>-->
     </div>
     <div ref="thMessageInput" class="inputbox" :class="{'textShow':textShow}" v-if="showInput!==false">
       <template v-if="useText">
